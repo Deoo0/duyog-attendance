@@ -27,3 +27,16 @@ export async function deleteRow(table:keyof Data,id:string) { await request(`${t
 export async function saveAttendance(rows:Data["attendance"]) { if(rows.length) await request("attendance?on_conflict=rehearsal_id,member_id","POST",rows); }
 
 
+
+export type PublicAttendance = {
+ title: string; date: string; time: string;
+ attendees: { name: string; voice: import("./data").Voice }[];
+};
+export async function loadPublicAttendance(signal?: AbortSignal): Promise<PublicAttendance | null> {
+ const response = await fetch(`${url}/rest/v1/rpc/recent_public_attendance`, {
+  method: "POST", headers: { apikey: key!, "Content-Type": "application/json" },
+  body: "{}", cache: "no-store", signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(10000)]) : AbortSignal.timeout(10000),
+ });
+ if (!response.ok) throw new Error("Recent attendance is unavailable.");
+ return response.json();
+}

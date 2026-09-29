@@ -67,3 +67,11 @@ npm run build
 
 ## Update an existing database: optional member details
 Run supabase/migrations/20260929_optional_member_details.sql in the Supabase SQL Editor before deploying this update. Only name and voice require user input. Status defaults to Active; email, phone, birthday, member-since date, photo, and notes are saved as null when left blank. Existing records are preserved. The Log out button is in the top bar on desktop and mobile in connected mode; demo mode has no authenticated session.
+
+## Public recent attendance on the login page
+
+For an existing database, run `supabase/migrations/20260929_public_recent_attendance.sql` in the Supabase SQL Editor, then deploy the updated app. New projects get the same function from `supabase/schema.sql`.
+
+The logged-out page shows the latest rehearsal whose scheduled time has passed (Asia/Manila) and has at least one saved attendance record. It lists all members marked Present or Late, with name and voice part only, including historical attendees now marked inactive. A newer unrecorded or future rehearsal does not replace it. If the latest register has no attendees, it displays an empty list rather than falling back to an older rehearsal.
+
+This summary is intentionally accessible without signing in. A parameterless, read-only Supabase function exposes only the rehearsal title/date/time and attending members' names/voices. Member IDs, photos, contact details, notes, absent/excused names, and other rehearsal history are not returned. Existing table RLS and grants remain unchanged. No service-role or secret key is needed. Search and voice filters operate on this limited result. Fetch failures never block administrator sign-in; the section offers a retry button. Refresh the page to fetch newly saved attendance.
