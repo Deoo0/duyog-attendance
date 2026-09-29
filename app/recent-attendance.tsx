@@ -3,9 +3,14 @@
 import { useEffect, useState } from "react";
 import { dateLabel, timeLabel, voices, type Voice } from "./data";
 import { Icon } from "./ui";
-import { loadPublicAttendance, type PublicAttendance } from "./store";
+import { loadPublicAttendance, loadPublicAbsences, type PublicAttendance } from "./store";
+
+import AbsencePanel from "./absence-panel";
+import type { AbsenceSummary } from "./attendance-rules";
 
 export default function RecentAttendance() {
+ const [watch,setWatch]=useState<AbsenceSummary|null>(null);
+ const [watchFailed,setWatchFailed]=useState(false);
  const [summary, setSummary] = useState<PublicAttendance | null>(null);
  const [loading, setLoading] = useState(true);
  const [failed, setFailed] = useState(false);
@@ -19,6 +24,7 @@ export default function RecentAttendance() {
   }).catch(() => {
    if (!controller.signal.aborted) { setFailed(true); setLoading(false); }
   });
+  loadPublicAbsences(controller.signal).then(value=>{if(!controller.signal.aborted){setWatch(value);setWatchFailed(false);}}).catch(()=>{if(!controller.signal.aborted)setWatchFailed(true);});
   return () => controller.abort();
  }, [attempt]);
  const attendees = summary?.attendees.filter(member =>
@@ -36,5 +42,6 @@ export default function RecentAttendance() {
     <div className="public-register-footer"><span className="tiny-dot"/> Present and late members are included. Updates appear after attendance is saved.</div>
    </>}
   </div>
+ {watch?<AbsencePanel summary={watch}/>:watchFailed?<div className="panel empty"><p>Absence information is temporarily unavailable.</p><button className="btn" onClick={()=>{setWatchFailed(false);setAttempt(value=>value+1);}}>Retry absence information</button></div>:<div className="panel empty" role="status">Loading absence information…</div>}
  </section>;
 }

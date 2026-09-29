@@ -1,6 +1,6 @@
 export type Voice = "Soprano" | "Alto" | "Tenor" | "Bass";
 export type Member = { id: string; name: string; voice: Voice; email: string | null; phone: string | null; birthday: string | null; joined: string | null; status: "Active" | "Inactive"; photo: string | null; notes: string | null };
-export type Rehearsal = { id: string; title: string; date: string; time: string; location: string; notes: string };
+export type Rehearsal = { id: string; title: string; date: string; time: string; location: string; notes: string; kind?: "Regular" | "Extra"; cancelled?: boolean };
 export type Attendance = { id: string; rehearsal_id: string; member_id: string; status: "Present" | "Late" | "Absent" | "Excused" };
 export type Data = { members: Member[]; rehearsals: Rehearsal[]; attendance: Attendance[] };
 export const voices: Voice[] = ["Soprano", "Alto", "Tenor", "Bass"];

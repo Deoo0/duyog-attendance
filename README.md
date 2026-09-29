@@ -75,3 +75,31 @@ For an existing database, run `supabase/migrations/20260929_public_recent_attend
 The logged-out page shows the latest rehearsal whose scheduled time has passed (Asia/Manila) and has at least one saved attendance record. It lists all members marked Present or Late, with name and voice part only, including historical attendees now marked inactive. A newer unrecorded or future rehearsal does not replace it. If the latest register has no attendees, it displays an empty list rather than falling back to an older rehearsal.
 
 This summary is intentionally accessible without signing in. A parameterless, read-only Supabase function exposes only the rehearsal title/date/time and attending members' names/voices. Member IDs, photos, contact details, notes, absent/excused names, and other rehearsal history are not returned. Existing table RLS and grants remain unchanged. No service-role or secret key is needed. Search and voice filters operate on this limited result. Fetch failures never block administrator sign-in; the section offers a retry button. Refresh the page to fetch newly saved attendance.
+
+
+## Weekly rehearsals and absence watch
+
+Run `supabase/migrations/20260930_recurring_rehearsals_absence_watch.sql` in the existing Supabase project's SQL Editor, then redeploy. The updated `schema.sql` includes it for new projects. Existing rehearsals become **Regular** by default; edit any special practices to **Extra**, and cancelled dates to **Cancelled**, before relying on the streak report.
+
+In **Rehearsals → New rehearsal**, enable **Repeat weekly**. Tuesdays and Thursdays are preselected; choose additional days if needed, set a start/end date and time, and create all sessions in one operation. The initial end date is eight weeks after the start; ranges up to one year are supported. Each date gets its own register automatically, so you only select a date and mark attendance. Records are never reused or overwritten between dates. Generation ends at your chosen end date; create another batch to extend the schedule. For different times on different weekdays, create one batch per time/day combination. A one-off Extra rehearsal can be added anytime.
+
+Repeated batch submissions skip existing sessions with the same date, time, and type, including cancelled sessions. Each session can be edited/cancelled individually; changing one date does not change the whole batch. Cancel instead of delete when you need to preserve history. The batch RPC runs atomically under the existing administrator RLS policies.
+
+**Attendance watch**, on both the public login page and administrator Overview, shows current absence streaks for active members and absent names/voices for each saved regular rehearsal. Four or more consecutive Absent marks show **Subject to removal review**. No member is automatically removed. Use the existing member status control to mark a reviewed member Inactive and retain history.
+
+- Present, Late, and Excused each break the streak (as requested).
+- Unmarked entries in a saved register break the streak; they are never inferred as absent.
+- Entirely unrecorded rehearsals remain pending and are skipped until attendance is saved.
+- Extra, cancelled, future, and pre-joining rehearsals do not contribute. Rehearsal times use Asia/Manila.
+- Mark unmarked absent is an explicit bulk action that still requires **Save attendance**. It does not replace existing marks.
+- Correcting saved attendance recalculates streaks. Inactive members remain in historical absence lists but are excluded from current removal-review flags.
+
+The public RPC intentionally exposes names, voice parts, absence streaks, and regular rehearsal absence lists without login, as requested. Private profile data and direct table access remain protected. Login-page summaries update on refresh; dashboard summaries update immediately after a local save. Large admin datasets are fetched in pages so the Supabase default row cap does not truncate streak history.
+
+Run the regression tests with Node 22.18+ or newer:
+
+```sh
+node --test tests/attendance-rules.test.mjs
+```
+
+The local checks do not execute migrations against your hosted Supabase project. Verify its public RPCs and administrator batch creation after applying the migration.
