@@ -64,3 +64,6 @@ CSV exports include saved records only. Concurrent edits to the same record use 
 npm run lint
 npm run build
 ```
+
+## Update an existing database: optional member details
+Run supabase/migrations/20260929_optional_member_details.sql in the Supabase SQL Editor before deploying this update. Only name and voice require user input. Status defaults to Active; email, phone, birthday, member-since date, photo, and notes are saved as null when left blank. Existing records are preserved. The Log out button is in the top bar on desktop and mobile in connected mode; demo mode has no authenticated session.

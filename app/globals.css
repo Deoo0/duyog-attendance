@@ -11,3 +11,5 @@
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 @media(max-width:760px){.sidebar{visibility:hidden}.sidebar.open{visibility:visible}}
 
+
+.logout-button{color:var(--maroon);flex-shrink:0}@media(max-width:480px){.topbar-right .connection,.topbar-right .admin-avatar{display:none}.logout-button{font-size:11px;padding:8px 10px}}

@@ -12,11 +12,11 @@ create table public.members (
  id uuid primary key default gen_random_uuid(),
  name text not null check (length(trim(name)) between 1 and 100),
  voice text not null check (voice in ('Soprano','Alto','Tenor','Bass')),
- email text not null default '', phone text not null default '',
- birthday text not null default '', joined date not null default current_date,
+ email text, phone text,
+ birthday text, joined date,
  status text not null default 'Active' check (status in ('Active','Inactive')),
- photo text not null default '' check (octet_length(photo) <= 700000),
- notes text not null default ''
+ photo text check (octet_length(photo) <= 700000),
+ notes text
 );
 create table public.rehearsals (
  id uuid primary key default gen_random_uuid(),

@@ -13,7 +13,7 @@ async function auth(body: object, grant: string) {
  sessionStorage.setItem("duyog-session",JSON.stringify(session));
 }
 export async function signIn(email:string,password:string) { await auth({email,password},"password"); }
-export async function signOut() { try { if(session) await fetch(`${url}/auth/v1/logout`,{method:"POST",headers:{apikey:key!,Authorization:`Bearer ${session.access_token}`}}); } finally {session=null;sessionStorage.removeItem("duyog-session");} }
+export async function signOut() { try { if(session) await fetch(`${url}/auth/v1/logout`,{method:"POST",signal:AbortSignal.timeout(8000),headers:{apikey:key!,Authorization:`Bearer ${session.access_token}`}}); } finally {session=null;sessionStorage.removeItem("duyog-session");} }
 async function request(path:string, method="GET",body?:unknown) {
  if(!session) throw new Error("Please sign in again.");
  if(session.expires_at<Date.now()+60000) { refreshing ??= auth({refresh_token:session.refresh_token},"refresh_token").finally(()=>{refreshing=null;}); await refreshing; }
@@ -25,4 +25,5 @@ export async function loadData():Promise<Data> { const admins=await request("cho
 export async function saveRow(table:keyof Data,row:object) { await request(table,"POST",row); }
 export async function deleteRow(table:keyof Data,id:string) { await request(`${table}?id=eq.${encodeURIComponent(id)}`,"DELETE"); }
 export async function saveAttendance(rows:Data["attendance"]) { if(rows.length) await request("attendance?on_conflict=rehearsal_id,member_id","POST",rows); }
+
 

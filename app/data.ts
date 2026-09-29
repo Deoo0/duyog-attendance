@@ -1,5 +1,5 @@
 export type Voice = "Soprano" | "Alto" | "Tenor" | "Bass";
-export type Member = { id: string; name: string; voice: Voice; email: string; phone: string; birthday: string; joined: string; status: "Active" | "Inactive"; photo: string; notes: string };
+export type Member = { id: string; name: string; voice: Voice; email: string | null; phone: string | null; birthday: string | null; joined: string | null; status: "Active" | "Inactive"; photo: string | null; notes: string | null };
 export type Rehearsal = { id: string; title: string; date: string; time: string; location: string; notes: string };
 export type Attendance = { id: string; rehearsal_id: string; member_id: string; status: "Present" | "Late" | "Absent" | "Excused" };
 export type Data = { members: Member[]; rehearsals: Rehearsal[]; attendance: Attendance[] };
@@ -16,3 +16,9 @@ export function seed(): Data {
  return {members,rehearsals,attendance};
 }
 export function rate(records: Attendance[]) { const eligible=records.filter(r=>r.status!=="Excused"); return eligible.length ? Math.round(eligible.filter(r=>r.status==="Present" || r.status==="Late").length/eligible.length*100) : null; }
+
+export function normalizeMember(member: Member): Member {
+ return { ...member, name: member.name.trim(), email: member.email?.trim() || null,
+ phone: member.phone?.trim() || null, birthday: member.birthday || null,
+ joined: member.joined || null, photo: member.photo || null, notes: member.notes?.trim() || null };
+}
